@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!-- Темний фон задано прямо тут, щоб при відкритті з PowerPoint не було білого спалаху. -->
+<html lang="uk" style="background:#0a0d2b">
+<head>
+  <meta charset="utf-8">
+  <title>Фінал</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/final.css">
+</head>
+<body>
+
+  <!-- Єдина кінематографічна сцена 1920 × 1080; масштабується під екран у js/final.js. -->
+  <div class="stage" id="stage">
+
+    <!-- 1. Небо з подарунком (той самий кадр, що у PowerPoint) -->
+    <img class="sky" id="sky" alt="">
+    <div class="sky-dim" id="skyDim"></div>
+
+    <!-- 2. Світло подарунка: рівень керується timeline, «дихання» — CSS -->
+    <div class="gift-light" id="giftLight">
+      <div class="gift-light__level" id="giftLevel"><div class="gift-light__glow"></div></div>
+      <div class="gift-light__pulse" id="giftPulse"></div>
+    </div>
+    <div class="gift-beam" id="giftBeam"></div>
+
+    <!-- 3. Іскри (один canvas) і теплий спалах кульмінації -->
+    <canvas class="particles" id="particles"></canvas>
+    <div class="warm-veil" id="warmVeil"></div>
+
+    <!-- 4. Act I–II: дитяче фото → відео → сучасне фото в одній світловій рамці -->
+    <div class="portrait" id="portrait">
+      <div class="portrait__media">
+        <video class="portrait__layer" id="thenNowVideo" muted playsinline preload="auto"></video>
+        <img class="portrait__layer" id="childhoodPhoto" alt="">
+        <img class="portrait__layer portrait__layer--modern" id="modernPhoto" alt="">
+      </div>
+    </div>
+
+    <!-- 5. Act III: 6 спогадів (створюються з config.memories) -->
+    <div class="layer" id="memories"></div>
+
+    <!-- 6. Act IV: 12 зірок і 12 слів (створюються з config.wishes) -->
+    <div class="layer" id="stars"></div>
+    <div class="layer" id="wishes"></div>
+
+    <!-- 7. Тексти -->
+    <p class="phrase" id="phraseChildhood"></p>
+    <p class="phrase" id="phrasePresent"></p>
+
+    <!-- 8. Привітання: м'яка віньєтка і блоки тексту (з config.greeting) -->
+    <div class="greeting-veil" id="greetingVeil"></div>
+    <div class="layer" id="greeting"></div>
+
+    <!-- 9. Останній кадр: два рядки тексту і серце, яке малює одна світлова нитка.
+         Обгортка задає центр і розмір; SVG лежить поверх неї і масштабується через viewBox. -->
+    <div class="birthday" id="birthday">
+      <h1 class="birthday__title" id="birthdayTitle">
+        <span class="birthday__line" id="birthdayLine"></span>
+        <span class="birthday__name" id="birthdayName"></span>
+      </h1>
+
+      <svg class="birthday__heart" id="birthdayHeart" viewBox="0 0 1100 800" aria-hidden="true">
+        <defs>
+          <!-- Знизу вгору: золото → корал → малина. Нитка йде знизу вгору і назад,
+               тому вздовж неї виходить золото → корал → малина → корал → золото. -->
+          <linearGradient id="heartGradient" gradientUnits="userSpaceOnUse" x1="470" y1="880" x2="640" y2="50">
+            <stop offset="0" stop-color="#ffdc96"/>
+            <stop offset="0.3" stop-color="#ffcf8a"/>
+            <stop offset="0.58" stop-color="#ff9f82"/>
+            <stop offset="1" stop-color="#f2709f"/>
+          </linearGradient>
+          <radialGradient id="heartSparkGlow">
+            <stop offset="0" stop-color="#fffdf2"/>
+            <stop offset="0.35" stop-color="#ffe6a8" stop-opacity="0.85"/>
+            <stop offset="1" stop-color="#ffc878" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="heartBlur" x="-10%" y="-10%" width="120%" height="130%">
+            <feGaussianBlur stdDeviation="7"/>
+          </filter>
+        </defs>
+
+        <!-- Три шари одного контуру: сяйво, кольорова нитка, світле ядро.
+             stroke-dasharray / stroke-dashoffset ставляться на групу і успадковуються. -->
+        <g class="heart__thread" id="heartThread">
+          <path class="heart__stroke heart__stroke--glow"/>
+          <path class="heart__stroke heart__stroke--color"/>
+          <path class="heart__stroke heart__stroke--core" id="heartPath"/>
+        </g>
+
+        <!-- Хвиля світла, що один раз пробігає готовою ниткою. -->
+        <path class="heart__stroke heart__shimmer" id="heartShimmer"/>
+
+        <!-- Іскра — «кінчик» нитки. Позицію (transform) ставить JS у кожному кадрі. -->
+        <g id="heartSpark">
+          <g class="heart__spark" id="heartSparkBody">
+            <circle r="17" fill="url(#heartSparkGlow)"/>
+            <circle r="4.5" fill="#fffdf4"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- 10. Стартовий шар: один клік дозволяє звук і запускає фінал -->
+    <div class="start" id="start">
+      <div class="start__star" id="startStar"></div>
+      <div class="start__label" id="startLabel"></div>
+    </div>
+
+    <!-- Лише для ?debug=1 -->
+    <pre class="debug" id="debug" hidden></pre>
+  </div>
+
+  <!-- Fade to black наприкінці: поза сценою, щоб закрити й поля навколо неї. -->
+  <div class="blackout" id="blackout"></div>
+
+  <audio id="music" preload="auto"></audio>
+
+  <!-- Звичайні скрипти (не модулі): так сцена працює при відкритті файлу з диска. -->
+  <script src="js/config.js"></script>
+  <script src="js/final.js"></script>
+</body>
+</html>

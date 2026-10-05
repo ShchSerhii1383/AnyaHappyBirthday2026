@@ -1,0 +1,620 @@
+/* ==========================================================================
+   ФІНАЛ — стилі сцени
+   --------------------------------------------------------------------------
+   Тут лише вигляд і «стани спокою». Увесь рух у часі запускає js/final.js;
+   позиції та розміри, що залежать від контенту, приходять із js/config.js.
+
+   Зміст:
+     1. Шрифти та змінні
+     2. Сторінка і сцена
+     3. Небо та світло подарунка
+     4. Портрет (дитинство → сьогодення)
+     5. Спогади
+     6. Зірки та слова
+     7. Тексти
+     8. Стартовий шар
+     9. Debug
+   ========================================================================== */
+
+/* ------------------------------------------------------------ 1. Шрифти */
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('../assets/fonts/CormorantGaramond-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('../assets/fonts/CormorantGaramond-MediumItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('../assets/fonts/CormorantGaramond-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('../assets/fonts/CormorantGaramond-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  --night: #0a0d2b;                 /* колір полів навколо сцени */
+  --cream: #fff4dc;                 /* основний колір тексту */
+  --ivory: #fff8e8;                 /* текст привітання і фінального титру */
+  --ink-rgb: 10, 12, 48;            /* темна «підкладка» під текстом */
+  --gold-rgb: 255, 214, 140;        /* тепле світіння */
+  --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+}
+
+/* ------------------------------------------------------ 2. Сторінка і сцена */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;                 /* жодних scrollbars */
+  background: var(--night);
+}
+
+body {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.is-playing {
+  cursor: none;
+}
+
+.stage {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 1920px;                    /* фактичні розміри ставить JS із config.stage */
+  height: 1080px;
+  overflow: hidden;
+  transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+  transform-origin: center;
+  background: var(--night);
+  font-family: var(--serif);
+  color: var(--cream);
+  opacity: 0;                       /* проявляється, коли assets готові */
+  transition: opacity 0.5s ease;
+}
+
+.stage.is-ready {
+  opacity: 1;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ------------------------------------------- 3. Небо та світло подарунка */
+
+.sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform-origin: 50% 76%;        /* повільний наїзд іде «в подарунок» */
+  will-change: transform;
+}
+
+/* Легке затемнення неба, щоб текст і фото читались краще. */
+.sky-dim {
+  position: absolute;
+  inset: 0;
+  background: rgb(var(--ink-rgb));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Контейнер центрується у точці layout.giftLight. */
+.gift-light {
+  position: absolute;
+  width: 1100px;
+  height: 820px;
+  margin: -410px 0 0 -550px;
+  pointer-events: none;
+}
+
+.gift-light__level,
+.gift-light__pulse {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.gift-light__glow,
+.gift-light__pulse {
+  background: radial-gradient(
+    ellipse closest-side,
+    rgba(255, 250, 228, 0.95) 0%,
+    rgba(255, 228, 164, 0.6) 16%,
+    rgba(255, 192, 112, 0.22) 44%,
+    rgba(255, 170, 90, 0) 100%
+  );
+}
+
+.gift-light__glow {
+  position: absolute;
+  inset: 0;
+  animation: giftBreath 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes giftBreath {
+  from { opacity: 0.8; transform: scale(0.96); }
+  to   { opacity: 1;   transform: scale(1.04); }
+}
+
+/* Стовп світла вгору від подарунка — лише в кульмінації. */
+.gift-beam {
+  position: absolute;
+  width: 760px;
+  height: 900px;
+  margin: -900px 0 0 -380px;        /* низ стовпа стоїть у точці світла */
+  background: radial-gradient(
+    ellipse 50% 100% at 50% 100%,
+    rgba(255, 242, 208, 0.62) 0%,
+    rgba(255, 216, 150, 0.2) 42%,
+    rgba(255, 200, 130, 0) 72%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.warm-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 62% at 50% 76%,
+    rgba(255, 238, 200, 0.9) 0%,
+    rgba(255, 202, 132, 0.34) 46%,
+    rgba(255, 180, 110, 0) 82%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ------------------------------------- 4. Портрет (дитинство → сьогодення) */
+
+.portrait {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 28px;
+  /* Світлова рамка замість фізичної: тонкий обідок і м'яке золоте сяйво. */
+  box-shadow:
+    0 0 0 2px rgba(255, 238, 202, 0.85),
+    0 0 24px 4px rgba(255, 206, 132, 0.62),
+    0 0 84px 18px rgba(255, 182, 102, 0.26);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.portrait__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #1a1430;
+}
+
+.portrait__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portrait__layer--modern {
+  opacity: 0;                       /* проявляється поверх останніх кадрів відео */
+}
+
+/* ------------------------------------------------------------- 5. Спогади */
+
+.memory {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.memory__img {
+  display: block;
+  width: auto;
+  height: 100%;
+  /* Ледь помітне «плавання», щоб галерея не була застиглою. */
+  animation: memoryFloat 7s ease-in-out infinite alternate;
+  animation-delay: var(--float-delay, 0s);
+}
+
+@keyframes memoryFloat {
+  from { transform: translateY(-5px); }
+  to   { transform: translateY(5px); }
+}
+
+/* -------------------------------------------------------- 6. Зірки та слова */
+
+/* Зірка — точка нульового розміру; все малюється градієнтами навколо неї.
+   --c задає колір ("R, G, B"). */
+.star {
+  position: absolute;
+  width: 0;
+  height: 0;
+  --c: 255, 205, 115;
+  will-change: transform;           /* наприкінці зірки летять у подарунок */
+}
+
+.star__body,
+.star__twinkle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+
+.star__body {
+  opacity: 0;                       /* до Act IV зірок не видно */
+  will-change: transform, opacity;
+}
+
+.star__twinkle {
+  animation: starTwinkle var(--twinkle, 3.4s) ease-in-out infinite alternate;
+  animation-delay: var(--twinkle-delay, 0s);
+}
+
+@keyframes starTwinkle {
+  from { opacity: 0.76; transform: scale(0.93); }
+  to   { opacity: 1;    transform: scale(1.05); }
+}
+
+.star__halo,
+.star__spike,
+.star__core {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+}
+
+.star__halo {
+  left: -115px;
+  top: -115px;
+  width: 230px;
+  height: 230px;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(var(--c), 0.9) 8%,
+    rgba(var(--c), 0.46) 24%,
+    rgba(var(--c), 0.15) 52%,
+    rgba(var(--c), 0) 100%
+  );
+}
+
+.star__spike {
+  background: radial-gradient(
+    ellipse closest-side,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.95) 14%,
+    rgba(var(--c), 0.8) 34%,
+    rgba(var(--c), 0.3) 62%,
+    rgba(var(--c), 0) 100%
+  );
+}
+
+.star__spike--v {
+  left: -5px;
+  top: -125px;
+  width: 10px;
+  height: 250px;
+}
+
+.star__spike--h {
+  left: -105px;
+  top: -4px;
+  width: 210px;
+  height: 8px;
+}
+
+.star__core {
+  left: -14px;
+  top: -14px;
+  width: 28px;
+  height: 28px;
+  background: radial-gradient(
+    circle closest-side,
+    #fff 0%,
+    rgba(255, 255, 255, 0.95) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+/* Слово набране великим кеглем (для показу в центрі) і зменшується
+   трансформацією, коли летить під свою зірку. */
+.wish {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding-left: 0.08em;             /* компенсує розрядку після останньої літери */
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  color: var(--cream);
+  text-shadow:
+    0 0 0.07em rgba(var(--ink-rgb), 1),
+    0 0 0.22em rgba(var(--ink-rgb), 0.95),
+    0 0.04em 0.1em rgba(var(--ink-rgb), 0.85),
+    0 0 0.55em rgba(var(--c, 255, 214, 140), 0.5);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.wish__inner {
+  display: inline-block;
+}
+
+/* --------------------------------------------------------------- 7. Тексти */
+
+.phrase {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  margin: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 54px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.15;
+  text-shadow:
+    0 0 16px rgba(var(--ink-rgb), 0.95),
+    0 2px 6px rgba(var(--ink-rgb), 0.8),
+    0 0 44px rgba(var(--gold-rgb), 0.36);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- Привітання ---
+   Замість підкладки під текстом — м'яка еліптична віньєтка, що розчиняється
+   в небі. Центр і розмір шрифтів ставить JS із layout.greeting. */
+.greeting-veil {
+  position: absolute;
+  width: 1760px;
+  height: 860px;
+  margin: -430px 0 0 -880px;        /* центр віньєтки стоїть у точці layout.greeting */
+  background: radial-gradient(
+    ellipse closest-side,
+    rgba(var(--ink-rgb), 0.62) 0%,
+    rgba(var(--ink-rgb), 0.44) 48%,
+    rgba(var(--ink-rgb), 0) 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.greeting__block {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: max-content;
+  margin: 0;
+  text-align: center;
+  white-space: pre-line;            /* \n у config.js стає переносом рядка */
+  font-weight: 500;
+  line-height: 1.42;
+  color: var(--ivory);
+  text-shadow:
+    0 0 14px rgba(var(--ink-rgb), 0.9),
+    0 2px 5px rgba(var(--ink-rgb), 0.8),
+    0 0 38px rgba(var(--gold-rgb), 0.3);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* --- Останній кадр: текст у світловому серці ---
+   .birthday — обгортка композиції; її центр і розмір ставить JS із layout.birthday. */
+.birthday {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Два рядки по центру серця: між верхньою впадиною і місцем, де воно звужується. */
+.birthday__title {
+  position: absolute;
+  left: 50%;
+  top: 51%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--ivory);
+  text-shadow:
+    0 0 14px rgba(var(--ink-rgb), 0.9),
+    0 3px 8px rgba(var(--ink-rgb), 0.7),
+    0 0 30px rgba(var(--gold-rgb), 0.38),
+    0 0 80px rgba(255, 190, 110, 0.18);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.birthday__line {
+  line-height: 1.15;
+}
+
+.birthday__name {
+  line-height: 1.1;
+}
+
+/* SVG накриває обгортку; стебло нитки виходить за її межі вниз, до подарунка. */
+.birthday__heart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  will-change: filter;              /* «дихання» яскравості йде без перемальовування */
+}
+
+.heart__stroke {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.heart__stroke--glow {
+  stroke: url(#heartGradient);
+  stroke-width: 12;
+  opacity: 0.72;
+  filter: url(#heartBlur);
+}
+
+.heart__stroke--color {
+  stroke: url(#heartGradient);
+  stroke-width: 4.6;
+  opacity: 0.92;
+}
+
+.heart__stroke--core {
+  stroke: #fff6e0;
+  stroke-width: 2;
+  opacity: 0.95;
+}
+
+.heart__shimmer {
+  stroke: #fffaf0;
+  stroke-width: 5;
+  opacity: 0;
+}
+
+.heart__spark {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Останнє затемнення. fixed — щоб чорним стали й поля навколо сцени. */
+.blackout {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------- 8. Стартовий шар */
+
+.start {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 54px;
+  padding-bottom: 150px;            /* підпис стоїть над світлом подарунка */
+  box-sizing: border-box;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.8s ease 0.3s;
+}
+
+.stage.is-ready .start {
+  opacity: 1;
+}
+
+.start__star {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+.start__star .star__body {
+  opacity: 1;
+  transform: scale(0.5);
+}
+
+.start__label {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-left: 0.3em;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--cream);
+  text-shadow:
+    0 0 14px rgba(var(--ink-rgb), 0.9),
+    0 0 34px rgba(var(--gold-rgb), 0.75);
+  animation: startPulse 2.6s ease-in-out infinite alternate;
+}
+
+/* Тонкі світлові штрихи обабіч напису — замість «кнопки». */
+.start__label::before,
+.start__label::after {
+  content: '';
+  width: 120px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(var(--gold-rgb), 0), rgba(var(--gold-rgb), 0.9));
+}
+
+.start__label::after {
+  transform: scaleX(-1);
+  margin-left: -0.3em;              /* розрядка додає зайвий відступ праворуч */
+}
+
+@keyframes startPulse {
+  from { opacity: 0.72; }
+  to   { opacity: 1; }
+}
+
+/* ---------------------------------------------------------------- 9. Debug */
+
+.debug {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  z-index: 100;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #b6ffb0;
+  font: 18px/1.35 Consolas, 'Courier New', monospace;
+  white-space: pre-wrap;
+  max-width: 900px;
+  pointer-events: none;
+}
